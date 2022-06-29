@@ -1,0 +1,4 @@
+"""
+Safe password main
+PYCAMP
+"""
