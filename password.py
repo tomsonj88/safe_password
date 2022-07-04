@@ -35,7 +35,6 @@ class Password:
         result = [char.isupper() for char in self.text]
         return any(result)
 
-
     def is_special_char(self) -> bool:
         result = []
         for char in self.text:
