@@ -3,15 +3,22 @@ Safe password main
 PYCAMP
 """
 import logging
+from api import ApiPwnedPasswords
 from password import Password
+from file import File
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
 
 passwords = []
-with open("passwords.txt") as file:
-    passwords = file.read().split("\n")
+api = ApiPwnedPasswords()
+input_file = File("passwords.txt")
+passwords = input_file.read_from_file()
+output_file = File("bezpieczne.txt")
+output_file.write_to_file("", mode="w")
 
 for pswd in passwords:
-    print(pswd)
-    result = Password(pswd)
-    result.is_safe()
+    password = Password(pswd)
+    hash_to_send = password.slice_5_chars_from_hash()
+    hashes = api.get(hash_to_send)
+    if password.is_safe(hashes):
+        output_file.write_to_file(str(password) + "\n", mode="a")

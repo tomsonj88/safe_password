@@ -3,9 +3,11 @@ class Password
 """
 
 import logging
+import time
 from hashlib import sha1
+from api import ApiPwnedPasswords
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
 
 
 class EmptyPasswordError(Exception):
@@ -17,6 +19,9 @@ class Password:
         if len(text) == 0:
             raise EmptyPasswordError("Empty password")
         self.text = text
+
+    def __str__(self):
+        return self.text
 
     def is_min_8_chars(self) -> bool:
         if len(self.text) >= 8:
@@ -47,33 +52,46 @@ class Password:
                 result.append(False)
         return any(result)
 
-    def is_safe(self):
+    def is_safe(self, hashes: str):
         validator = list()
         validator.append(self.is_min_8_chars())
         validator.append(self.is_digit_in_str())
         validator.append(self.is_lower_letter())
         validator.append(self.is_upper_letter())
         validator.append(self.is_special_char())
-        # ToDo: feedback from haveibeenpwnd.com
+        # ToDo: feedback from https://haveibeenpwned.com/
+        validator.append(self.is_not_leaked(hashes))
         if all(validator):
-#            print(f"Password {self.text} is safe")
+            # print(f"Password {self.text} is safe")
+            # time.sleep(0.1)
             logging.info(f"Password {self.text} is safe")
+            return True
         else:
-#            print(f"Password {self.text} is NOT safe")
+            # print(f"Password {self.text} is NOT safe")
+            # time.sleep(0.1)
             logging.info(f"Password {self.text} is NOT safe")
-            print("dupa")
+            return False
+
+    def str2byte(self):
+        return self.text.encode("utf-8")
 
     def make_hash(self):
-        password_in_bytes = self.text.encode("utf-8")
-        print(password_in_bytes)
+        password_in_bytes = self.str2byte()
         hash = sha1(password_in_bytes).hexdigest()
-        print(hash)
+        # print(hash)
         return hash
 
-    def slice_first_5chars_hash(self):
+    def slice_5_chars_from_hash(self):
         hash_beginning = self.make_hash()[:5]
-        print(hash_beginning)
         return hash_beginning
+
+    def is_not_leaked(self, hashes: str):
+        pswd_hash = self.make_hash().upper()
+        pswd_hash = pswd_hash[5:]
+        if pswd_hash in hashes:
+            return False
+        return True
+
 
 pswd = Password("qwerty")
 # print(pswd.is_min_length())
@@ -83,5 +101,6 @@ pswd = Password("qwerty")
 # print(pswd.slice_5_first_chars())
 # print(pswd.is_special_char())
 
-pswd.make_hash()
-pswd.slice_first_5chars_hash()
+# pswd.make_hash()
+# pswd.slice_5_chars()
+# pswd.is_safe()
