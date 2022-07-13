@@ -44,7 +44,7 @@ def test_hash_making():
 
 
 def test_slice_method():
-    short_hash = pswd.slice_5_chars_from_hash()
+    short_hash = pswd.make_hash_ready_to_send()
     assert len(short_hash) == 5
     for element in range(5):
         assert short_hash[element] == personalization_hash[element]

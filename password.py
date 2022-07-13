@@ -3,9 +3,7 @@ class Password
 """
 
 import logging
-import time
 from hashlib import sha1
-from api import ApiPwnedPasswords
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
 
@@ -15,10 +13,10 @@ class EmptyPasswordError(Exception):
 
 
 class Password:
-    def __init__(self, text):
-        if len(text) == 0:
+    def __init__(self, password):
+        if len(password) == 0:
             raise EmptyPasswordError("Empty password")
-        self.text = text
+        self.text = password
 
     def __str__(self):
         return self.text
@@ -52,7 +50,7 @@ class Password:
                 result.append(False)
         return any(result)
 
-    def is_safe(self, hashes: str):
+    def is_safe(self, api_response: str):
         validator = list()
         validator.append(self.is_min_8_chars())
         validator.append(self.is_digit_in_str())
@@ -60,15 +58,13 @@ class Password:
         validator.append(self.is_upper_letter())
         validator.append(self.is_special_char())
         # ToDo: feedback from https://haveibeenpwned.com/
-        validator.append(self.is_not_leaked(hashes))
+        validator.append(not self.check_password_leakage(api_response))
         if all(validator):
             # print(f"Password {self.text} is safe")
-            # time.sleep(0.1)
             logging.info(f"Password {self.text} is safe")
             return True
         else:
             # print(f"Password {self.text} is NOT safe")
-            # time.sleep(0.1)
             logging.info(f"Password {self.text} is NOT safe")
             return False
 
@@ -78,29 +74,14 @@ class Password:
     def make_hash(self):
         password_in_bytes = self.str2byte()
         hash = sha1(password_in_bytes).hexdigest()
-        # print(hash)
         return hash
 
-    def slice_5_chars_from_hash(self):
+    def make_hash_ready_to_send(self):
         hash_beginning = self.make_hash()[:5]
         return hash_beginning
 
-    def is_not_leaked(self, hashes: str):
-        pswd_hash = self.make_hash().upper()
-        pswd_hash = pswd_hash[5:]
-        if pswd_hash in hashes:
-            return False
-        return True
-
-
-pswd = Password("qwerty")
-# print(pswd.is_min_length())
-# print(pswd.is_digit_in_str())
-# print(pswd.is_lower_letter())
-# print(pswd.is_upper_letter())
-# print(pswd.slice_5_first_chars())
-# print(pswd.is_special_char())
-
-# pswd.make_hash()
-# pswd.slice_5_chars()
-# pswd.is_safe()
+    def check_password_leakage(self, api_response:str):
+        pswd_hash = self.make_hash()[5:].upper()
+        if pswd_hash in api_response:
+            return True
+        return False

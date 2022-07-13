@@ -18,7 +18,7 @@ output_file.write_to_file("", mode="w")
 
 for pswd in passwords:
     password = Password(pswd)
-    hash_to_send = password.slice_5_chars_from_hash()
+    hash_to_send = password.make_hash_ready_to_send()
     hashes = api.get(hash_to_send)
     if password.is_safe(hashes):
         output_file.write_to_file(str(password) + "\n", mode="a")
