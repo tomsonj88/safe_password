@@ -11,7 +11,9 @@ class ConnectionError(Exception):
 class ApiPwnedPasswords:
     url = "https://api.pwnedpasswords.com/range/"
 
-    def get(self, first_5_hash_chars: str):
+    def get_pwned_passwords(self, first_5_hash_chars: str):
         with get(self.url + first_5_hash_chars, timeout=5) as content:
             return content.text
         # ToDo: ConnectionError
+
+# ToDo: test for "get" method
