@@ -7,6 +7,7 @@ from hashlib import sha1
 from abc import ABC, abstractmethod
 from api import ApiPwnedPasswords
 from logger import set_logger
+from requests import get
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', level=logging.INFO)
 
@@ -90,11 +91,13 @@ class PasswordValidator(ValidatorInterface):
         return hash_beginning
 
     def check_password_leakage(self):
-        hash_password = self.make_hash_ready_to_send()
-        api = ApiPwnedPasswords()
-        api_response = api.get_pwned_passwords(hash_password)
-        pswd_hash = self.make_hash()[5:].upper()
-        if pswd_hash in api_response:
-            return True
-        return False
+        hash_password_beggining = self.make_hash_ready_to_send()
+        # api = ApiPwnedPasswords()
+        # api_response = api.get_pwned_passwords(hash_password_beggining)
+        url = "https://api.pwnedpasswords.com/range/"
+        hash_password_end = self.make_hash()[5:].upper()
+        with get(url + hash_password_beggining) as content:
+            if hash_password_end in content.text:
+                return True
+            return False
 
