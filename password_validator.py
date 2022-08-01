@@ -4,16 +4,24 @@ class Password
 
 import logging
 from hashlib import sha1
+from abc import ABC, abstractmethod
 from api import ApiPwnedPasswords
+from logger import set_logger
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', level=logging.INFO)
+
+
+class ValidatorInterface(ABC):
+    @abstractmethod
+    def validate(self):
+        pass
 
 
 class EmptyPasswordError(Exception):
     pass
 
 
-class PasswordValidator:
+class PasswordValidator(ValidatorInterface):
     def __init__(self, password):
         if len(password) == 0:
             logging.error("Password can't be empty.")
@@ -52,14 +60,13 @@ class PasswordValidator:
                 result.append(False)
         return any(result)
 
-    def is_safe(self):
-        validator = list()
+    def validate(self):
+        validator = []
         validator.append(self.is_min_8_chars())
         validator.append(self.is_digit_in_str())
         validator.append(self.is_lower_letter())
         validator.append(self.is_upper_letter())
         validator.append(self.is_special_char())
-        # ToDo: feedback from https://haveibeenpwned.com/
         validator.append(not self.check_password_leakage())
         if all(validator):
             # print(f"Password {self.password} is safe")
@@ -90,3 +97,4 @@ class PasswordValidator:
         if pswd_hash in api_response:
             return True
         return False
+

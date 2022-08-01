@@ -6,8 +6,9 @@ import logging
 from api import ApiPwnedPasswords
 from password_validator import PasswordValidator
 from file import File
+from logger import set_logger
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
+pswd_logger = set_logger("password_logger", "bezpieczne.txt")
 
 passwords = []
 api = ApiPwnedPasswords()
@@ -18,5 +19,6 @@ output_file.write_to_file("", mode="w")
 
 for pswd in passwords:
     password = PasswordValidator(pswd)
-    if password.is_safe():
-        output_file.write_to_file(str(password) + "\n", mode="a")
+    if password.validate():
+        # output_file.write_to_file(str(password) + "\n", mode="a")
+        pswd_logger.info(password)

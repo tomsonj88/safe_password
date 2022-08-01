@@ -83,7 +83,7 @@ def test_is_safe_password(requests_mock):
             106186E54D6664416F354E3F2208A21669C:2
             """
     requests_mock.get("https://api.pwnedpasswords.com/range/21ba5", text=data)
-    assert strong_pswd.is_safe() is True
+    assert strong_pswd.validate() is True
 
 
 def test_is_not_safe_password(requests_mock):
@@ -97,4 +97,4 @@ def test_is_not_safe_password(requests_mock):
             2891F3B1CB433A969D5F54692E5D68F4D77:14
             """
     requests_mock.get("https://api.pwnedpasswords.com/range/42352", text=data)
-    assert weak_pswd.is_safe() is False
+    assert weak_pswd.validate() is False
