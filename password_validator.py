@@ -50,16 +50,10 @@ class PasswordValidator(ValidatorInterface):
         return any(result)
 
     def is_special_char(self) -> bool:
-        result = []
         for char in self.password:
-            if 33 <= ord(char) <= 47 \
-                    or 58 <= ord(char) <= 64 \
-                    or 91 <= ord(char) <= 96 \
-                    or 123 <= ord(char) <= 126:
-                result.append(True)
-            else:
-                result.append(False)
-        return any(result)
+            if not char.isalnum():
+                return True
+        return False
 
     def validate(self):
         validator = []
@@ -100,4 +94,3 @@ class PasswordValidator(ValidatorInterface):
             if hash_password_end in content.text:
                 return True
             return False
-
