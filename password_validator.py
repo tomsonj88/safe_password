@@ -56,13 +56,14 @@ class PasswordValidator(ValidatorInterface):
         return False
 
     def validate(self):
-        validator = []
-        validator.append(self.is_min_8_chars())
-        validator.append(self.is_digit_in_str())
-        validator.append(self.is_lower_letter())
-        validator.append(self.is_upper_letter())
-        validator.append(self.is_special_char())
-        validator.append(not self.check_password_leakage())
+        validator = [
+            self.is_min_8_chars(),
+            self.is_digit_in_str(),
+            self.is_lower_letter(),
+            self.is_upper_letter(),
+            self.is_special_char(),
+            not self.check_password_leakage()
+            ]
         if all(validator):
             # print(f"Password {self.password} is safe")
             logging.info(f"Password {self.password} is safe")
