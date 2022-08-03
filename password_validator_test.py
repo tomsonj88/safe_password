@@ -10,7 +10,7 @@ def test_empty_password():
 
 def test_weak_password():
     password = PasswordValidator("asqwert")
-    assert password.is_min_8_chars() is False       # OK
+    assert password.is_min_length() is False       # OK
     assert password.is_digit_in_str() is False      # OK
     assert password.is_upper_letter() is False      # OK
     assert password.is_special_char() is False      # OK
@@ -18,7 +18,7 @@ def test_weak_password():
 
 def test_strong_password():
     password = PasswordValidator("a43G*r#jDW9_")
-    assert password.is_min_8_chars() is True
+    assert password.is_min_length() is True
     assert password.is_digit_in_str() is True
     assert password.is_lower_letter() is True       # OK
     assert password.is_upper_letter() is True
@@ -41,13 +41,6 @@ personalization_hash = "49AA4709BF1E304C4236855E8FFF9C760B75C058".lower()
 
 def test_hash_making():
     assert pswd.make_hash() == personalization_hash
-
-
-def test_slice_method():
-    short_hash = pswd.make_hash_ready_to_send()
-    assert len(short_hash) == 5
-    for element in range(5):
-        assert short_hash[element] == personalization_hash[element]
 
 
 def test_password_has_been_pwned(requests_mock):

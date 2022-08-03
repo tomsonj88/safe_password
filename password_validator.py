@@ -5,7 +5,6 @@ class Password
 import logging
 from hashlib import sha1
 from abc import ABC, abstractmethod
-from api import ApiPwnedPasswords
 from logger import set_logger
 from requests import get
 
@@ -22,6 +21,10 @@ class EmptyPasswordError(Exception):
     pass
 
 
+class ValidationError(Exception):
+    pass
+
+
 class PasswordValidator(ValidatorInterface):
     def __init__(self, password):
         if len(password) == 0:
@@ -32,32 +35,39 @@ class PasswordValidator(ValidatorInterface):
     def __str__(self):
         return self.password
 
-    def is_min_8_chars(self) -> bool:
-        if len(self.password) >= 8:
+    def is_min_length(self, min_length=8) -> bool:
+        if len(self.password) >= min_length:
             return True
-        return False
+        #return False
+        raise ValidationError(f"Text doesn't contain {min_length} chars")
 
     def is_digit_in_str(self) -> bool:
         result = [char.isdigit() for char in self.password]
-        return any(result)
+        if any(result):
+            return True
+        raise ValidationError("Text doesn't contain any digit")
 
     def is_lower_letter(self) -> bool:
         result = [char.islower() for char in self.password]
-        return any(result)
+        if any(result):
+            return True
+        raise ValidationError("Text doesn't contain lower letter")
 
     def is_upper_letter(self) -> bool:
         result = [char.isupper() for char in self.password]
-        return any(result)
+        if any(result):
+            return True
+        raise ValidationError("Text doesn't contain upper letter")
 
     def is_special_char(self) -> bool:
         for char in self.password:
             if not char.isalnum():
                 return True
-        return False
+        raise ValidationError("Text doesn't contain special character")
 
     def validate(self):
         validator = [
-            self.is_min_8_chars(),
+            self.is_min_length(),
             self.is_digit_in_str(),
             self.is_lower_letter(),
             self.is_upper_letter(),
@@ -65,33 +75,22 @@ class PasswordValidator(ValidatorInterface):
             not self.check_password_leakage()
             ]
         if all(validator):
-            # print(f"Password {self.password} is safe")
-            logging.info(f"Password {self.password} is safe")
             return True
-        else:
-            # print(f"Password {self.password} is NOT safe")
-            logging.info(f"Password {self.password} is NOT safe")
-            return False
+        return False
 
     def str2byte(self):
         return self.password.encode("utf-8")
 
     def make_hash(self):
         password_in_bytes = self.str2byte()
-        hash = sha1(password_in_bytes).hexdigest()
-        return hash
-
-    def make_hash_ready_to_send(self):
-        hash_beginning = self.make_hash()[:5]
-        return hash_beginning
+        password_hash = sha1(password_in_bytes).hexdigest()
+        return password_hash
 
     def check_password_leakage(self):
-        hash_password_beggining = self.make_hash_ready_to_send()
-        # api = ApiPwnedPasswords()
-        # api_response = api.get_pwned_passwords(hash_password_beggining)
+        hash_password_beggining = self.make_hash()[:5]
         url = "https://api.pwnedpasswords.com/range/"
         hash_password_end = self.make_hash()[5:].upper()
         with get(url + hash_password_beggining) as content:
             if hash_password_end in content.text:
-                return True
+                raise ValidationError("This password was leaked")
             return False
