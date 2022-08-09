@@ -26,6 +26,7 @@ def test_weak_password():
 
 def test_strong_password():
     password = PasswordValidator("a43G*r#jDW9_")
+
     assert password.is_min_length() is True
     assert password.is_digit_in_str() is True
     assert password.is_lower_letter() is True       # OK
@@ -35,7 +36,9 @@ def test_strong_password():
 
 def test_no_lower_letter():
     password = PasswordValidator("ABC")
-    assert password.is_lower_letter() is False
+    with pytest.raises(ValidationError) as error:
+        password.is_lower_letter()
+    assert "Text doesn't contain lower letter" in str(error.value)
 
 
 def test_str2byte_conv():
