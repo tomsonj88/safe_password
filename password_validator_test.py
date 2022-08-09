@@ -63,7 +63,9 @@ def test_password_has_been_pwned(requests_mock):
             FE872CEF798B9CAD912B101B1FCA6E054C6:1
             """
     requests_mock.get("https://api.pwnedpasswords.com/range/a94a8", text=data)
-    assert password.check_password_leakage() is True
+    with pytest.raises(ValidationError) as error:
+        password.check_password_leakage()
+    assert "This password was leaked" in str(error.value)
 
 
 def test_password_has_not_been_pwned(requests_mock):
@@ -101,4 +103,6 @@ def test_is_not_safe_password(requests_mock):
             2891F3B1CB433A969D5F54692E5D68F4D77:14
             """
     requests_mock.get("https://api.pwnedpasswords.com/range/42352", text=data)
-    assert weak_pswd.validate() is False
+    with pytest.raises(ValidationError) as error:
+        weak_pswd.validate()
+    assert "Text doesn't contain 8 chars" in str(error.value)
