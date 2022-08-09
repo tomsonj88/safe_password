@@ -18,5 +18,5 @@ with open("passwords.txt") as input_file, open("bezpieczne.txt", mode="w") as ou
                 logging.info(f"Password {password} is safe")
                 output_file.write(str(password))
         except ValidationError as error:
-            print(error)
             logging.info(f"Password {password} is NOT safe")
+            print(error)

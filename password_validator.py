@@ -38,7 +38,6 @@ class PasswordValidator(ValidatorInterface):
     def is_min_length(self, min_length=8) -> bool:
         if len(self.password) >= min_length:
             return True
-        #return False
         raise ValidationError(f"Text doesn't contain {min_length} chars")
 
     def is_digit_in_str(self) -> bool:

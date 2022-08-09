@@ -1,19 +1,27 @@
 import pytest
-from password_validator import PasswordValidator, EmptyPasswordError
+from password_validator import PasswordValidator, EmptyPasswordError, ValidationError
 
 
 def test_empty_password():
     with pytest.raises(EmptyPasswordError) as message:
         PasswordValidator("")
-        assert message == "Empty password"
+    assert "Empty password" in str(message)
 
 
 def test_weak_password():
     password = PasswordValidator("asqwert")
-    assert password.is_min_length() is False       # OK
-    assert password.is_digit_in_str() is False      # OK
-    assert password.is_upper_letter() is False      # OK
-    assert password.is_special_char() is False      # OK
+    with pytest.raises(ValidationError) as error:
+        password.is_min_length()
+    assert "Text doesn't contain 8 chars" in str(error.value)
+    with pytest.raises(ValidationError) as error:
+        password.is_digit_in_str()
+    assert "Text doesn't contain any digit" in str(error.value)
+    with pytest.raises(ValidationError) as error:
+        password.is_upper_letter()
+    assert "Text doesn't contain upper letter" in str(error.value)
+    with pytest.raises(ValidationError) as error:
+        password.is_special_char()
+    assert "Text doesn't contain special character" in str(error.value)
 
 
 def test_strong_password():
