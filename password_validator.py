@@ -9,6 +9,7 @@ from logger import set_logger
 from requests import get
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', level=logging.INFO)
+request_logger = set_logger("request", "log_requests.log", logging.INFO, mode="w")
 
 
 class ValidatorInterface(ABC):
@@ -88,8 +89,10 @@ class PasswordValidator(ValidatorInterface):
     def check_password_leakage(self):
         hash_password_beggining = self.make_hash()[:5]
         url = "https://api.pwnedpasswords.com/range/"
+        full_url = url + hash_password_beggining
         hash_password_end = self.make_hash()[5:].upper()
-        with get(url + hash_password_beggining) as content:
+        with get(full_url) as content:
+            request_logger.info(full_url)
             if hash_password_end in content.text:
                 raise ValidationError("This password was leaked")
             return False
