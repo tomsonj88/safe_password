@@ -1,14 +1,26 @@
+"""
+Test for password validator module
+"""
+
 import pytest
 from password_validator import PasswordValidator, EmptyPasswordError, ValidationError
 
 
 def test_empty_password():
+    """
+    Test for exception if password is empty
+    """
     with pytest.raises(EmptyPasswordError) as message:
         PasswordValidator("")
     assert "Empty password" in str(message)
 
 
 def test_weak_password():
+    """
+    Test for weak password. It checks if exception are raises in case of
+    password with no minimal length, no digit, no upper letter
+    and no special character.
+    """
     password = PasswordValidator("asqwert")
     with pytest.raises(ValidationError) as error:
         password.is_min_length()
@@ -25,16 +37,25 @@ def test_weak_password():
 
 
 def test_strong_password():
+    """
+    Test for strong password. It checks if methods for password
+    with minimal length, digit, lower and upper letter,
+    with special character returns True"
+    """
     password = PasswordValidator("a43G*r#jDW9_")
 
     assert password.is_min_length() is True
     assert password.is_digit_in_str() is True
-    assert password.is_lower_letter() is True       # OK
+    assert password.is_lower_letter() is True
     assert password.is_upper_letter() is True
     assert password.is_special_char() is True
 
 
 def test_no_lower_letter():
+    """
+    Test checks if exception are raises in case of
+    password doesn't contain lower letter.
+    """
     password = PasswordValidator("ABC")
     with pytest.raises(ValidationError) as error:
         password.is_lower_letter()
@@ -42,19 +63,26 @@ def test_no_lower_letter():
 
 
 def test_str2byte_conv():
-    pswd = PasswordValidator("table")
-    assert type(pswd.str2byte()) == bytes
-
-
-pswd = PasswordValidator("personalization")
-personalization_hash = "49AA4709BF1E304C4236855E8FFF9C760B75C058".lower()
+    """
+    Test for str to byte conversion
+    """
+    password = PasswordValidator("table")
+    assert isinstance(password.str2byte(), bytes)
 
 
 def test_hash_making():
+    """
+    Test to check if hash using SHA-1 is generated properly.
+    """
+    pswd = PasswordValidator("personalization")
+    personalization_hash = "49AA4709BF1E304C4236855E8FFF9C760B75C058".lower()
     assert pswd.make_hash() == personalization_hash
 
 
 def test_password_has_been_pwned(requests_mock):
+    """
+    Test checks if leaked password raises exception
+    """
     password = PasswordValidator("test")
     data = """
             FDFAEE848356AD27F8FB494E5C1B11956C2:3
@@ -69,6 +97,9 @@ def test_password_has_been_pwned(requests_mock):
 
 
 def test_password_has_not_been_pwned(requests_mock):
+    """
+    Test checks if password wasn't leak
+    """
     password = PasswordValidator("python_is_the_anwser")
     data = """
             FDFAEE848356AD27F8FB494E5C1B11956C2:3
@@ -81,6 +112,11 @@ def test_password_has_not_been_pwned(requests_mock):
 
 
 def test_is_safe_password(requests_mock):
+    """
+    Test checks if password validate method return properly, that password is safe
+    :param requests_mock:
+    :return:
+    """
     strong_pswd = PasswordValidator("ar58#HJkdi")
     data = """
             0FD7ED272E8DC9732E9C389AC6503D0C3BC:7
@@ -93,6 +129,12 @@ def test_is_safe_password(requests_mock):
 
 
 def test_is_not_safe_password(requests_mock):
+    """
+    Test checks if password_validate method raise exception that
+    password is not safe and show why
+    :param requests_mock:
+    :return:
+    """
     weak_pswd = PasswordValidator("python")
     data = """
             2797D4688208BA70C9DCA74D5A922FCECBD:2
