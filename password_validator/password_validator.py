@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from hashlib import sha1
 import logging
 from requests import get
-from logger import set_logger
+from password_validator.logger import set_logger
 
 
 

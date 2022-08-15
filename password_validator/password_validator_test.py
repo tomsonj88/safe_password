@@ -3,7 +3,11 @@ Test for password validator module
 """
 
 import pytest
-from password_validator import PasswordValidator, EmptyPasswordError, ValidationError
+from password_validator.password_validator import (
+    PasswordValidator,
+    EmptyPasswordError,
+    ValidationError
+    )
 
 
 def test_empty_password():
